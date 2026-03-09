@@ -1,0 +1,26 @@
+python-dotenv
+ipykernel
+SoccerNet
+opencv-python
+ffmpeg-python
+decord
+moviepy
+albumentations
+tqdm
+tensorboard
+lightning
+scikit-learn
+matplotlib
+seaborn
+pandas
+numpy
+flask
+gunicorn
+transformers
+timm
+tensorflow==2.12.0
+tfrecord
+# --index-url https://download.pytorch.org/whl/cu121
+# torch==2.4.0+cu121
+# torchvision==0.19.0+cu121
+# torchaudio==2.4.0+cu121

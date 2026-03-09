@@ -1,5 +1,5 @@
-data/
-*.tfrecord
+footballEventDetectionEnv/
+runs/
 *.pth
 *.h5
 *.mp4
