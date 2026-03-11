@@ -2,7 +2,7 @@ footballEventDetectionEnv/
 runs/
 *.pth
 *.h5
-*.mp4
+*.mp3
 *.mkv
 __pycache__/
 *.pyc
