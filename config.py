@@ -20,6 +20,10 @@ NUM_WORKERS        = 4
 
 CHECKPOINT_DIR = Path("checkpoints")
 CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+
+TRAINING_VERSION = Path("checkpoints/v1")
+TRAINING_VERSION.mkdir(exist_ok=True)
+
 LOG_DIR        = Path("runs")
 
 PREFETCH_FACTOR = 2
