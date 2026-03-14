@@ -2,6 +2,9 @@ import torch
 import struct
 import config
 import numpy as np
+import random
+import torchvision.transforms as T
+from torchvision.transforms import functional as TF
 from torch.utils.data import Dataset, DataLoader
 from tensorflow.core.example.example_pb2 import Example
 # from tfrecord.torch.dataset import TFRecordDataset, MultiTFRecordDataset
@@ -44,10 +47,30 @@ def parse_example(raw_bytes):
             result[key] = list(feature.float_list.value)
     return result
 
+
+
+class VideoAugment:
+    def __init__(self):
+        self.color_jitter = T.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
+
+    def __call__(self, video):
+        if random. random() > 0.5:
+            video = torch.flip(video, dims=[3])
+
+        
+        i, j, h, w = T.RandomResizedCrop.get_params(
+            video[0], scale=(0.6, 1.0), ratio=(0.75, 1.33)
+        )
+        video = torch.stack([TF.resized_crop(f, i, j, h, w, (224, 224,)) for f in video])
+
+        video = torch.stack([self.color_jitter(f) for f in video])
+
+        return video
+    
 class FootballTFRecordDataset(Dataset):
     def __init__(self, tfrecord_path, transform=None):
         self.tfrecord_path = tfrecord_path
-        self.transform = transform
+        self.transform = VideoAugment()
 
         self.offsets = build_offset_index(tfrecord_path)
 
@@ -79,7 +102,7 @@ class FootballTFRecordDataset(Dataset):
         return video, label
     
 def get_dataloaders():
-    train_ds = FootballTFRecordDataset(config.TRAIN_TFRECORD_PATH)
+    train_ds = FootballTFRecordDataset(config.TRAIN_TFRECORD_PATH, transform=VideoAugment())
     train_loader = DataLoader(
         train_ds,
         batch_size=config.BATCH_SIZE,
@@ -92,7 +115,7 @@ def get_dataloaders():
     
     val_loader = None
     if config.VAL_TFRECORD_PATH.exists():
-        val_ds = FootballTFRecordDataset(config.VAL_TFRECORD_PATH)
+        val_ds = FootballTFRecordDataset(config.VAL_TFRECORD_PATH, transform=None)
         val_loader = DataLoader(
             val_ds,
             batch_size=config.BATCH_SIZE,

@@ -131,6 +131,7 @@ from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 import glob
 import config
+from torch.optim.lr_scheduler import OneCycleLR
 
 
 class Trainer:
@@ -138,14 +139,25 @@ class Trainer:
         self.model = model.to(config.DEVICE)
         self.train_loader = train_loader
         self.val_loader = val_loader
-        self.optimizer = AdamW(self.model.parameters(), lr=config.LR, weight_decay=config.WEIGHT_DECAY)
+        # self.optimizer = AdamW(self.model.parameters(), lr=config.LR, weight_decay=config.WEIGHT_DECAY)
+        self.optimizer = AdamW([
+            {"params": self.model.videomae.parameters(), "lr": config.LR},
+            {"params": self.model.classifier.parameters(), "lr": config.LR * 10},
+        ], weight_decay=config.WEIGHT_DECAY)
         self.scheduler = CosineAnnealingLR(self.optimizer, T_max=config.NUM_EPOCHS)
+        # self.scheduler = OneCycleLR(
+        #     self.optimizer,
+        #     max_lr=config.LR,
+        #     steps_per_epoch=len(train_loader),
+        #     epochs=config.NUM_EPOCHS,
+        #     pct_start=0.1
+        # )
         self.scaler = GradScaler('cuda')
         self.best_acc = 0.0
         self.best_loss = float('inf')
         self.start_epoch = 0          
 
-        self._resume_if_checkpoint_exists()
+        # self._resume_if_checkpoint_exists()
 
     def _resume_if_checkpoint_exists(self):
         """
@@ -216,6 +228,7 @@ class Trainer:
             if (step + 1) % config.ACCUMULATION_STEPS == 0:
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
+                # self.scheduler.step()
                 self.optimizer.zero_grad()
 
             total_loss += loss.item() * config.ACCUMULATION_STEPS
@@ -266,6 +279,7 @@ class Trainer:
         return acc, f1
 
     def fit(self, num_epochs):
+        self.start_epoch = 0
         if self.start_epoch >= num_epochs:
             print(f"Already completed {self.start_epoch}/{num_epochs} epochs. Nothing to do.")
             return
@@ -273,6 +287,14 @@ class Trainer:
         print(f"Training epochs {self.start_epoch + 1} → {num_epochs}")
 
         for epoch in range(self.start_epoch, num_epochs):
+
+            # if epoch < 3:
+            #     for name, param in self.model.named_parameters():
+            #         param.requires_grad = "classifier" in name
+            # else:
+            #     for param in self.model.parameters():
+            #         param.requires_grad = True
+
             self.train_epoch(epoch)
             acc, f1 = self.validate(epoch)
 
