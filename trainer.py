@@ -141,9 +141,9 @@ class Trainer:
         self.val_loader = val_loader
         # self.optimizer = AdamW(self.model.parameters(), lr=config.LR, weight_decay=config.WEIGHT_DECAY)
         self.optimizer = AdamW([
-            {"params": self.model.videomae.parameters(), "lr": config.LR},
-            {"params": self.model.classifier.parameters(), "lr": config.LR * 10},
-        ], weight_decay=config.WEIGHT_DECAY)
+            {"params": self.model.videomae.parameters(), "lr": config.LR, "weight_decay": 0.05},
+            {"params": self.model.classifier.parameters(), "lr": config.LR * 10, "weight_decay": 0.01},
+        ])
         self.scheduler = CosineAnnealingLR(self.optimizer, T_max=config.NUM_EPOCHS)
         # self.scheduler = OneCycleLR(
         #     self.optimizer,
@@ -157,14 +157,14 @@ class Trainer:
         self.best_loss = float('inf')
         self.start_epoch = 0          
 
-        # self._resume_if_checkpoint_exists()
+        self._resume_if_checkpoint_exists()
 
     def _resume_if_checkpoint_exists(self):
         """
         Auto-resume from the latest epoch_N.pth checkpoint if one exists.
         Restores: model weights, optimizer, scheduler, scaler, epoch, best_acc.
         """
-        checkpoint_dir = config.CHECKPOINT_DIR
+        checkpoint_dir = config.TRAINING_VERSION
         epoch_checkpoints = sorted(
             glob.glob(str(checkpoint_dir / "epoch_*.pth")),
             key=lambda p: int(p.split("epoch_")[-1].replace(".pth", ""))
@@ -254,7 +254,7 @@ class Trainer:
                 with autocast(device_type="cuda", dtype=torch.float16):
                     outputs = self.model(videos)
                     logits = outputs.logits
-                    batch_loss = nn.CrossEntropyLoss()(logits, labels)
+                    batch_loss = nn.CrossEntropyLoss(label_smoothing=0.1)(logits, labels)
 
                 pred = torch.argmax(logits, dim=-1).cpu().numpy()
                 preds.extend(pred)
@@ -279,7 +279,7 @@ class Trainer:
         return acc, f1
 
     def fit(self, num_epochs):
-        self.start_epoch = 0
+        # self.start_epoch = 0
         if self.start_epoch >= num_epochs:
             print(f"Already completed {self.start_epoch}/{num_epochs} epochs. Nothing to do.")
             return

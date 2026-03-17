@@ -57,15 +57,35 @@ class VideoAugment:
         if random. random() > 0.5:
             video = torch.flip(video, dims=[3])
 
-        
-        i, j, h, w = T.RandomResizedCrop.get_params(
-            video[0], scale=(0.6, 1.0), ratio=(0.75, 1.33)
-        )
-        video = torch.stack([TF.resized_crop(f, i, j, h, w, (224, 224,)) for f in video])
+        brightness = random.uniform(0.6, 1.4)
+        contrast = random.uniform(0.7, 1.3)
+        video = torch.clamp(video * brightness, 0, 1)
+        video = torch.clamp((video - 0.5) * contrast + 0.5, 0, 1)
 
-        video = torch.stack([self.color_jitter(f) for f in video])
+        T, C, H, W = video.shape
+
+        crop_size = random.randint(int(0.75 * H), H)
+        top = random.randint(0, H - crop_size)
+        left = random.randint(0, W - crop_size)
+        video = video[:, :, top:top+crop_size, left:left+crop_size]
+        video = torch.nn.functional.interpolate(
+            video, size=(224, 224), mode="bilinear", align_corners=False
+        )
+
+        if random.random() > 0.8:
+            gray = video.mean(dim=1, keepdim=True).expand_as(video)
+            video = gray
 
         return video
+        
+        # i, j, h, w = T.RandomResizedCrop.get_params(
+        #     video[0], scale=(0.6, 1.0), ratio=(0.75, 1.33)
+        # )
+        # video = torch.stack([TF.resized_crop(f, i, j, h, w, (224, 224,)) for f in video])
+
+        # video = torch.stack([self.color_jitter(f) for f in video])
+
+        # return video
     
 class FootballTFRecordDataset(Dataset):
     def __init__(self, tfrecord_path, transform=None):

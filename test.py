@@ -254,20 +254,19 @@
 
 
 from collections import Counter
-from dataset import FootballTFRecordDataset
-import config
+import os
+from pathlib import Path
 
-ds = FootballTFRecordDataset(config.TRAIN_TFRECORD_PATH)
+OUTPUT_DIR = Path(r"D:\Football Highlight Generation\Event Clips Split\train")
 
-labels = []
-for i in range(len(ds)):
-    _, label = ds[i]
-    labels.append(label.item())
+counts = {}
+for cls in sorted(os.listdir(OUTPUT_DIR)):
+    cls_path = OUTPUT_DIR / cls
+    if cls_path.is_dir():
+        n = len(list(cls_path.glob("*.mp4")))
+        counts[cls] = n
+        print(f"  {cls:<25} {n:>4} clips")
 
-counts = Counter(labels)
-total = len(labels)
-
-print(f"Total samples: {total}")
-print(f"Num classes: {len(counts)}\n")
-for cls_id, count in sorted(counts.items()):
-    print(f"  Class {cls_id}: {count:5d} samples  ({100*count/total:.1f}%)")
+print(f"\nTotal: {sum(counts.values())} clips")
+print(f"Min class: {min(counts, key=counts.get)} ({min(counts.values())})")
+print(f"Max class: {max(counts, key=counts.get)} ({max(counts.values())})")

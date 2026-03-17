@@ -2,11 +2,11 @@ import torch
 from pathlib import Path
 
 
-TRAIN_TFRECORD_PATH = Path(r"E:\Football Highlight Generation\TFRecords Combined\train_merged_v1.tfrecord")
-# TRAIN_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\train.tfrecord")
+# TRAIN_TFRECORD_PATH = Path(r"E:\Football Highlight Generation\TFRecords Combined\train_merged_v1.tfrecord")
+TRAIN_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\train.tfrecord")
 VAL_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\val.tfrecord")
 
-MODEL_NAME         = "MCG-NJU/videomae-base"  # or "base" if VRAM allows
+MODEL_NAME         = "MCG-NJU/videomae-base"
 
 DEVICE             = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE         = 4
@@ -22,7 +22,7 @@ NUM_WORKERS        = 4
 CHECKPOINT_DIR = Path("checkpoints")
 CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
 
-TRAINING_VERSION = Path("checkpoints/v2") # Training Version II
+TRAINING_VERSION = Path("checkpoints/v3") # Training Version III
 TRAINING_VERSION.mkdir(exist_ok=True)
 
 LOG_DIR        = Path("runs")
