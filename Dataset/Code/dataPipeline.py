@@ -319,6 +319,9 @@ def download_missing_matches(competitions=None, seasons=None, max_per_class=2000
         Path(r"E:\Football Dataset\All records\train_new_1.tfrecord"),
         Path(r"E:\Football Dataset\All records\train_new_2.tfrecord"),
         Path(r"E:\Football Dataset\All records\train_new_3.tfrecord"),
+        Path(r"E:\Football Dataset\All records\train_new_4.tfrecord"),
+        Path(r"E:\Football Dataset\All records\train_new_5.tfrecord"),
+        Path(r"E:\Football Dataset\All records\train_new_6.tfrecord"),
         Path(r"E:\Football Dataset\All records\train_new.tfrecord"),
         Path(r"E:\train_new.tfrecord"),
     ])
@@ -393,9 +396,9 @@ if __name__ == "__main__":
     NEW_SEASONS = [
         # ("england_epl",        "2015-2016"),
         # ("england_epl",        "2016-2017"),
-        ("germany_bundesliga", "2016-2017"),
-        # ("france_ligue-1",     "2015-2016"),
-        # ("spain_laliga",       "2015-2016"),
+        # ("germany_bundesliga", "2017-2018"),
+        ("france_ligue-1",     "2017-2018"),
+        # ("europe_uefa-champions-league",       "2017-2018"),
     ]
 
     for competition, season in NEW_SEASONS:

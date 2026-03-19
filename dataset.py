@@ -4,8 +4,9 @@ import config
 import numpy as np
 import random
 import torchvision.transforms as T
+from collections import defaultdict
 from torchvision.transforms import functional as TF
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from tensorflow.core.example.example_pb2 import Example
 # from tfrecord.torch.dataset import TFRecordDataset, MultiTFRecordDataset
 # from albumentations import Compose, HorizontalFlip, RandomBrightnessContrast, ShiftScaleRotate, GaussNoise
@@ -86,11 +87,49 @@ class VideoAugment:
         # video = torch.stack([self.color_jitter(f) for f in video])
 
         # return video
-    
+
+# def get_weighted_sampler(dataset):
+#     class_counts = defaultdict(int)
+
+#     for _, label in dataset:
+#         class_counts[label.item()] += 1
+
+#     weights = [1.0 / class_counts[label.item()] for _, label in dataset]
+#     return WeightedRandomSampler(weights=weights, num_samples=len(weights), replacement=True)
+
+def get_weighted_sampler(dataset):
+    import tensorflow as tf
+
+    class_counts = defaultdict(int)
+    labels = []
+
+
+    # Use TF dataset to read only labels — no video loaded into RAM
+    tf_dataset = tf.data.TFRecordDataset(
+        str(dataset.tfrecord_path),
+        buffer_size=64 * 1024 * 1024
+    ).apply(tf.data.experimental.ignore_errors())
+
+    for i, raw in enumerate(tf_dataset):
+        parsed = tf.io.parse_single_example(
+            raw, {"label": tf.io.FixedLenFeature([], tf.int64)}
+        )
+        label_id = int(parsed["label"].numpy())
+        labels.append(label_id)
+        class_counts[label_id] += 1
+        if (i + 1) % 1000 == 0:
+            print(f"  Scanned {i+1} records...", end="\r")
+
+    print(f"\nDone. Total: {len(labels)} records.")
+    weights = [1.0 / class_counts[l] for l in labels]
+    return WeightedRandomSampler(weights=weights, num_samples=len(weights), replacement=True)
+
+
+
 class FootballTFRecordDataset(Dataset):
     def __init__(self, tfrecord_path, transform=None):
         self.tfrecord_path = tfrecord_path
-        self.transform = VideoAugment()
+        self.transform = transform
 
         self.offsets = build_offset_index(tfrecord_path)
 
@@ -123,10 +162,12 @@ class FootballTFRecordDataset(Dataset):
     
 def get_dataloaders():
     train_ds = FootballTFRecordDataset(config.TRAIN_TFRECORD_PATH, transform=VideoAugment())
+    sampler = get_weighted_sampler(dataset=train_ds)
     train_loader = DataLoader(
         train_ds,
         batch_size=config.BATCH_SIZE,
-        shuffle=True,
+        sampler=sampler,
+        # shuffle=True,  # Does not work with sampler
         num_workers=config.NUM_WORKERS,
         pin_memory=True,
         prefetch_factor=config.PREFETCH_FACTOR,
