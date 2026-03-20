@@ -24,10 +24,10 @@ SEED               = 42
 NUM_WORKERS        = 4
 
 CHECKPOINT_DIR = Path("checkpoints")
-CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+# CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
 
-TRAINING_VERSION = Path("checkpoints/v5") # Training Version IV
-TRAINING_VERSION.mkdir(exist_ok=True)
+TRAINING_VERSION = Path("checkpoints/v5") # Training Version V
+# TRAINING_VERSION.mkdir(exist_ok=True)
 
 LOG_DIR        = Path("runs")
 

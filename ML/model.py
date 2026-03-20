@@ -1,7 +1,11 @@
 import timm
 from transformers import VideoMAEForVideoClassification
-import config
 import torch.nn as nn
+
+import sys
+sys.path.append("..")
+
+import ML.config as config
 
 def get_model():
     model = VideoMAEForVideoClassification.from_pretrained(

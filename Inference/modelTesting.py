@@ -4,13 +4,11 @@ import numpy as np
 from pathlib import Path
 from transformers import VideoMAEForVideoClassification
 
+import sys
+sys.path.append("..")
 
-import os
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import ML.config as config
+
 
 CLASSES = [
     "Ball out of play", "Clearance", "Corner", "Direct free-kick",
@@ -19,26 +17,26 @@ CLASSES = [
     "Throw-in", "Yellow card"
 ]
 
-CHECKPOINT = Path(r"D:\Football Event Detection\checkpoints\best_acc_0.6627.pth")
-DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
+CHECKPOINT = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627.pth")
+# DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_FRAMES = 16
 IMG_SIZE   = 224
 
 def load_model(checkpoint_path):
     model = VideoMAEForVideoClassification.from_pretrained(
-        "MCG-NJU/videomae-base",
-        num_labels=len(CLASSES),
+        config.MODEL_NAME,
+        num_labels=config.NUM_CLASSES,
         ignore_mismatched_sizes=True
     )
 
     model.classifier = torch.nn.Sequential(
         torch.nn.Dropout(p=0.5),
-        torch.nn.Linear(model.config.hidden_size, len(CLASSES))
+        torch.nn.Linear(model.config.hidden_size, config.NUM_CLASSES)
     )
 
-    state_dict = torch.load(checkpoint_path, map_location=DEVICE)
+    state_dict = torch.load(checkpoint_path, map_location=config.DEVICE)
     model.load_state_dict(state_dict=state_dict)
-    model.to(DEVICE)
+    model.to(config.DEVICE)
     model.eval()
     print(f"Model loaded from {checkpoint_path}")
     return model
@@ -76,7 +74,7 @@ def preprocess(frames):
     """Convert frames to model input tensor."""
     video = torch.from_numpy(frames).float().div(255.0)  # (16, 224, 224, 3)
     video = video.permute(0, 3, 1, 2)                    # (16, 3, 224, 224)
-    video = video.unsqueeze(0).to(DEVICE)                 # (1, 16, 3, 224, 224)
+    video = video.unsqueeze(0).to(config.DEVICE)                 # (1, 16, 3, 224, 224)
     return video
 
 
@@ -132,59 +130,4 @@ if __name__ == "__main__":
     #     except Exception as e:
     #         print(f"Error on {clip.name}: {e}")
 
-    # TEST_DIR = Path(r"E:\Football Dataset\Event Clips Split\test")
-
-    # all_preds  = []
-    # all_labels = []
-    # errors     = []
-
-    # for cls_folder in sorted(TEST_DIR.iterdir()):
-    #     if not cls_folder.is_dir():
-    #         continue
-    #     true_label = cls_folder.name
-    #     if true_label not in CLASSES:
-    #         continue
-
-    #     for clip in cls_folder.glob("*.mp4"):
-    #         try:
-    #             preds = predict(model, clip, top_k=1)
-    #             predicted = preds[0]["class"]
-    #             confidence = preds[0]["confidence"]
-
-    #             all_preds.append(predicted)
-    #             all_labels.append(true_label)
-
-    #             if predicted != true_label:
-    #                 errors.append({
-    #                     "file": clip.name,
-    #                     "true": true_label,
-    #                     "predicted": predicted,
-    #                     "confidence": confidence
-    #                 })
-    #         except Exception as e:
-    #             print(f"Error on {clip.name}: {e}")
-
-    # # Accuracy
-    # correct = sum(p == l for p, l in zip(all_preds, all_labels))
-    # print(f"\nAccuracy: {correct}/{len(all_labels)} = {correct/len(all_labels)*100:.1f}%")
-
-    # # Top confused pairs
-    # from collections import Counter
-    # confused_pairs = Counter(
-    #     (e["true"], e["predicted"]) for e in errors
-    # )
-    # print("\nTop confused pairs (true → predicted):")
-    # for (true, pred), count in confused_pairs.most_common(10):
-    #     print(f"  {true:<22} → {pred:<22} {count} times")
-
-    # # Confusion matrix
-    # cm = confusion_matrix(all_labels, all_preds, labels=CLASSES)
-    # fig, ax = plt.subplots(figsize=(14, 12))
-    # disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=CLASSES)
-    # disp.plot(ax=ax, xticks_rotation=45, colorbar=False)
-    # plt.title("Confusion Matrix — v5 Model")
-    # plt.tight_layout()
-    # plt.savefig("confusion_matrix.png", dpi=150)
-    # plt.show()
-    # print("Saved confusion_matrix.png")
-
+    

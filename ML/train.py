@@ -1,9 +1,13 @@
 # train.py
 import torch
-from config import *
-from dataset import get_dataloaders
-from model import get_model
-from trainer import Trainer
+
+import sys
+sys.path.append("..")
+
+from ML.config import *
+from ML.dataset import get_dataloaders
+from ML.model import get_model
+from ML.trainer import Trainer
 
 def main():
     torch.manual_seed(SEED)

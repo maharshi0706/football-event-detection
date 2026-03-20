@@ -1,6 +1,10 @@
 import torch
 import struct
-import config
+
+import sys
+sys.path.append("..")
+import ML.config as config
+
 import numpy as np
 import random
 import torchvision.transforms as T
@@ -8,8 +12,6 @@ from collections import defaultdict
 from torchvision.transforms import functional as TF
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from tensorflow.core.example.example_pb2 import Example
-# from tfrecord.torch.dataset import TFRecordDataset, MultiTFRecordDataset
-# from albumentations import Compose, HorizontalFlip, RandomBrightnessContrast, ShiftScaleRotate, GaussNoise
 
 def build_offset_index(tfrecord_path):
     offsets = []

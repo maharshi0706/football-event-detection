@@ -6,9 +6,11 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 import glob
-import config
-from torch.optim.lr_scheduler import OneCycleLR
 
+import sys
+sys.path.append("..")
+
+import ML.config as config
 
 class Trainer:
     def __init__(self, model, train_loader, val_loader=None):
