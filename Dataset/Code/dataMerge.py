@@ -16,7 +16,7 @@ NEW_TFRECORDS = [
     Path(r"E:\Football Dataset\All records\train_new.tfrecord"),
 ]
 
-OUTPUT = Path(r"D:\Football Event Detection\Dataset\Data\train_merged_v2.tfrecord")
+OUTPUT = Path(r"E:\Football Dataset\train_merged_v2.tfrecord")
 
 all_files = [OLD_TFRECORD] + NEW_TFRECORDS
 
@@ -27,9 +27,9 @@ print(f"Merging {len(all_files)} files into {OUTPUT}...")
 
 for f in all_files:
     if f.exists():
-        print(f"  ✅ {f.name}: {f.stat().st_size / (2**30):.2f} GB")
+        print(f"{f.name}: {f.stat().st_size / (2**30):.2f} GB")
     else:
-        print(f"  ❌ Missing: {f}")
+        print(f"Missing: {f}")
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 with open(OUTPUT, "wb") as outfile:

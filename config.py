@@ -4,10 +4,11 @@ from pathlib import Path
 
 # Dataset Version I
 # TRAIN_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\train.tfrecord")  
+# VAL_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\val.tfrecord")
 
 # Dataset Version II
-TRAIN_TFRECORD_PATH = Path(r"D:\Football Event Detection\Dataset\Data\train_merged_v2.tfrecord")  
-VAL_TFRECORD_PATH = Path(r"D:\Football Highlight Generation\TFRecords\val.tfrecord")
+TRAIN_TFRECORD_PATH = Path(r"D:\Football Event Detection\Dataset\Data\train_v2.tfrecord")  
+VAL_TFRECORD_PATH = Path(r"D:\Football Event Detection\Dataset\Data\val_v2.tfrecord")  
 
 MODEL_NAME         = "MCG-NJU/videomae-base"
 
@@ -25,7 +26,7 @@ NUM_WORKERS        = 4
 CHECKPOINT_DIR = Path("checkpoints")
 CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
 
-TRAINING_VERSION = Path("checkpoints/v4") # Training Version IV
+TRAINING_VERSION = Path("checkpoints/v5") # Training Version IV
 TRAINING_VERSION.mkdir(exist_ok=True)
 
 LOG_DIR        = Path("runs")
