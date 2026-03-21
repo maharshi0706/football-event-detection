@@ -30,7 +30,7 @@ render_hero()
 _, col, _ = st.columns([1, 2, 1])
 with col:
     mode = st.radio(
-        "",
+        "Input Mode",
         ["📁  Upload clip", "🎬  Sample clips"],
         horizontal=True,
         label_visibility="collapsed"
@@ -70,7 +70,7 @@ with left:
 
         if clips:
             names           = [c["name"] for c in clips]
-            selected        = st.selectbox("", names, label_visibility="collapsed")
+            selected        = st.selectbox("Sample Clip", names, label_visibility="collapsed")
             sample_filename = next(c["filename"] for c in clips if c["name"] == selected)
 
             preview = get_sample_video(sample_filename)
