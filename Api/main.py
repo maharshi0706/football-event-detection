@@ -61,8 +61,8 @@ app.add_middleware(
 # LOAD MODEL LOCALLY OR FROM HF
 def get_weights_path() -> str:
     """Use local path if available or download and cache from HuggingFace."""
-    if WEIGHTS_PATH.exists():
-        return str(WEIGHTS_PATH)
+    # if WEIGHTS_PATH.exists():
+    #     return str(WEIGHTS_PATH)
     
     path = hf_hub_download(
         repo_id=HF_REPO,
