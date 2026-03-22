@@ -4,10 +4,10 @@ import numpy as np
 from pathlib import Path
 from transformers import VideoMAEForVideoClassification
 
-import sys
-sys.path.append("..")
+# import sys
+# sys.path.append("..")
 
-import ML.config as config
+# import ML.config as config
 
 
 CLASSES = [
@@ -18,25 +18,26 @@ CLASSES = [
 ]
 
 CHECKPOINT = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627.pth")
-# DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 NUM_FRAMES = 16
 IMG_SIZE   = 224
+NUM_CLASSES = 14
 
 def load_model(checkpoint_path):
     model = VideoMAEForVideoClassification.from_pretrained(
-        config.MODEL_NAME,
-        num_labels=config.NUM_CLASSES,
+        "MCG-NJU/videomae-base",
+        num_labels=NUM_CLASSES,
         ignore_mismatched_sizes=True
     )
 
     model.classifier = torch.nn.Sequential(
         torch.nn.Dropout(p=0.5),
-        torch.nn.Linear(model.config.hidden_size, config.NUM_CLASSES)
+        torch.nn.Linear(model.config.hidden_size, NUM_CLASSES)
     )
 
-    state_dict = torch.load(checkpoint_path, map_location=config.DEVICE)
+    state_dict = torch.load(checkpoint_path, map_location=DEVICE)
     model.load_state_dict(state_dict=state_dict)
-    model.to(config.DEVICE)
+    model.to(DEVICE)
     model.eval()
     print(f"Model loaded from {checkpoint_path}")
     return model
@@ -74,7 +75,7 @@ def preprocess(frames):
     """Convert frames to model input tensor."""
     video = torch.from_numpy(frames).float().div(255.0)  # (16, 224, 224, 3)
     video = video.permute(0, 3, 1, 2)                    # (16, 3, 224, 224)
-    video = video.unsqueeze(0).to(config.DEVICE)                 # (1, 16, 3, 224, 224)
+    video = video.unsqueeze(0).to(DEVICE)                 # (1, 16, 3, 224, 224)
     return video
 
 
@@ -111,23 +112,23 @@ def print_predictions(video_path, predictions):
     print()
 
 
-if __name__ == "__main__":
-    model = load_model(CHECKPOINT)
+# if __name__ == "__main__":
+#     model = load_model(CHECKPOINT)
 
-    # Single video
-    video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2015-03-10 - 22-45 FC Porto 4 - 0 Basel_37.mp4"
-    # video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2014-11-04 - 22-45 Dortmund 4 - 1 Galatasaray_179.mp4"
-    # video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2014-11-04 - 22-45 Arsenal 3 - 3 Anderlecht_59.mp4"
-    preds = predict(model, video_path, top_k=3)
-    print_predictions(video_path, preds)
+#     # Single video
+#     video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2015-03-10 - 22-45 FC Porto 4 - 0 Basel_37.mp4"
+#     # video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2014-11-04 - 22-45 Dortmund 4 - 1 Galatasaray_179.mp4"
+#     # video_path = r"E:\Football Dataset\Event Clips Split\test\Goal\Goal_2014-11-04 - 22-45 Arsenal 3 - 3 Anderlecht_59.mp4"
+#     preds = predict(model, video_path, top_k=3)
+#     print_predictions(video_path, preds)
 
-    # Batch inference on a folder
-    # clips_dir = Path(r"path\to\clips\folder")
-    # for clip in clips_dir.glob("*.mp4"):
-    #     try:
-    #         preds = predict(model, clip, top_k=3)
-    #         print_predictions(clip, preds)
-    #     except Exception as e:
-    #         print(f"Error on {clip.name}: {e}")
+#     # Batch inference on a folder
+#     # clips_dir = Path(r"path\to\clips\folder")
+#     # for clip in clips_dir.glob("*.mp4"):
+#     #     try:
+#     #         preds = predict(model, clip, top_k=3)
+#     #         print_predictions(clip, preds)
+#     #     except Exception as e:
+#     #         print(f"Error on {clip.name}: {e}")
 
     
