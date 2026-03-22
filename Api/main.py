@@ -20,8 +20,13 @@ MODEL_VERSION = "v5"
 NUM_CLASSES = 14
 
 HF_REPO = "MaharshiJoshi/football-event-detection"
-SAMPLE_FOLDER = Path(r"D:\Football Event Detection\Samples")
-WEIGHTS_PATH = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627.pth")
+
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
+SAMPLE_FOLDER = PROJECT_ROOT / "Samples"
+WEIGHTS_PATH = PROJECT_ROOT / "ML/checkpoints/best_acc_0.6627.pth"
+# SAMPLE_FOLDER = Path(r"D:\Football Event Detection\Samples")
+# WEIGHTS_PATH = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627.pth")
 
 ALLOWED_TYPES = {".mp4", ".avi", ".mov"}
 

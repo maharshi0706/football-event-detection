@@ -1,3 +1,7 @@
+--extra-index-url https://download.pytorch.org/whl/cpu # FOR RAILWAY DEPLOYMENT
+torch==2.1.0+cpu
+torchvision==0.16.0+cpu
+
 python-dotenv
 ipykernel
 SoccerNet
