@@ -1,19 +1,25 @@
+import os
 import sys
 sys.path.append("..")
+import tempfile
 import threading
 from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import  File, FastAPI, UploadFile, HTTPException
+from fastapi import File, FastAPI, UploadFile, HTTPException
 
 from Api.schemas import SampleClip, SampleResponse, PredictionResponse, PredictionSampleRequest, Prediction
 from Inference.modelTesting import load_model, predict
 
+from huggingface_hub import hf_hub_download
+
+
 MODEL_VERSION = "v5"
 NUM_CLASSES = 14
 
+HF_REPO = "MaharshiJoshi/football-event-detection"
 SAMPLE_FOLDER = Path(r"D:\Football Event Detection\Samples")
 WEIGHTS_PATH = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627.pth")
 
@@ -42,13 +48,27 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# LOAD MODEL LOCALLY OR FROM HF
+def get_weights_path() -> str:
+    """Use local path if available or download and cache from HuggingFace."""
+    if WEIGHTS_PATH.exists():
+        return str(WEIGHTS_PATH)
+    
+    path = hf_hub_download(
+        repo_id=HF_REPO,
+        filename=WEIGHTS_PATH
+    )
+    return path 
+
+
 
 def get_model():
+    weights_path = get_weights_path()
     global _model
     if _model is None:
         with _model_lock:
             print(f"Loading model from {WEIGHTS_PATH}")
-            _model = load_model(str(WEIGHTS_PATH))
+            _model = load_model(weights_path)
             print("Model Loaded.")
 
     return _model
@@ -120,3 +140,29 @@ async def predictSample(body: PredictionSampleRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference Failed: {e}")
     
+
+@app.post("/predict")
+async def predictUploadedFile(video: UploadFile = File(...)):
+    fileExtension = Path(video.filename).suffix.lower()
+    if fileExtension not in ALLOWED_TYPES:
+        raise HTTPException(status_code=422, detail=f"Unsupported file type: {fileExtension}. Use mp4")
+
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=fileExtension) as tmp:
+            contents = await video.read()
+            tmp.write(contents)
+            tmp_path = tmp.name
+
+        model = get_model()
+        raw = predict(model, tmp_path, top_k=3)
+        return _build_predict_raw(raw)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
+    
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
