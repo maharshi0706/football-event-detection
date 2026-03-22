@@ -66,7 +66,7 @@ def get_weights_path() -> str:
     
     path = hf_hub_download(
         repo_id=HF_REPO,
-        filename=WEIGHTS_PATH
+        filename="best_acc_0.6627.pth"
     )
     return path 
 
