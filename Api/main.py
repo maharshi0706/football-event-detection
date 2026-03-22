@@ -13,7 +13,7 @@ from fastapi import File, FastAPI, UploadFile, HTTPException
 from Api.schemas import SampleClip, SampleResponse, PredictionResponse, PredictionSampleRequest, Prediction
 from Inference.modelTesting import load_model, predict
 
-from huggingface_hub import hf_hub_download
+from huggingface_hub import hf_hub_download, snapshot_download
 
 
 MODEL_VERSION = "v5"
@@ -42,6 +42,15 @@ _model_lock = threading.Lock()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not SAMPLE_FOLDER.exists() or not any(SAMPLE_FOLDER.iterdir()):
+        print("Downloading sample clips.")
+        snapshot_download(
+            repo_id="MaharshiJoshi/Football-event-samples",
+            repo_type="dataset",
+            local_dir=str(SAMPLE_FOLDER),
+            token=os.getenv("HF_TOKEN")
+        )
+        print("Sample clips ready.")
     get_model()
     yield
 
