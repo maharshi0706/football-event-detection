@@ -1,0 +1,28 @@
+python-dotenv
+ipykernel
+SoccerNet
+# opencv-python # local
+opencv-python-headless # server
+ffmpeg-python
+decord
+moviepy
+albumentations
+tqdm
+tensorboard
+lightning
+scikit-learn
+matplotlib
+seaborn
+pandas
+numpy
+transformers
+timm
+tfrecord
+protobuf
+crcmod
+
+uvicorn
+
+fastapi[standard]
+
+huggingface_hub

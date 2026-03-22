@@ -33,6 +33,7 @@ ALLOWED_TYPES = {".mp4", ".avi", ".mov"}
 ALLOWED_ORIGINS = [
     "http://localhost:8501/",
     os.getenv("STREAMLIT_URL", ""),
+    "https://*.hf.space"
 ]
 
 _model = None
