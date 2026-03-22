@@ -1,7 +1,8 @@
 python-dotenv
 ipykernel
 SoccerNet
-opencv-python
+# opencv-python # local
+opencv-python-headless # server
 ffmpeg-python
 decord
 moviepy
@@ -21,6 +22,8 @@ timm
 tfrecord
 protobuf
 crcmod
+
+uvicorn
 
 fastapi[standard]
 streamlit

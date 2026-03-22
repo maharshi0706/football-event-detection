@@ -25,6 +25,11 @@ WEIGHTS_PATH = Path(r"D:\Football Event Detection\ML\checkpoints\best_acc_0.6627
 
 ALLOWED_TYPES = {".mp4", ".avi", ".mov"}
 
+ALLOWED_ORIGINS = [
+    "http://localhost:8501/",
+    os.getenv("STREAMLIT_URL", ""),
+]
+
 _model = None
 _model_lock = threading.Lock()
 
@@ -43,7 +48,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8501/"],
+    allow_origins=[o for o in ALLOWED_ORIGINS if o],
     allow_methods=["get","post"],
     allow_headers=["*"]
 )
