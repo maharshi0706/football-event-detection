@@ -2,7 +2,26 @@
 import requests
 from typing import Optional
 
-API_URL = "http://localhost:8000"
+import os
+import streamlit as st
+from pathlib import Path
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
+ENV_PATH = PROJECT_ROOT / ".env"
+load_dotenv(ENV_PATH)
+
+def get_api_url():
+    try:
+        return st.secrets("API_URL")
+    except Exception:
+        url = os.getenv("API_URL")
+        if url is None:
+            url = os.getenv("LOCAL_API_URL")
+        return url
+
+API_URL = get_api_url()
 TIMEOUT = 60
 
 
